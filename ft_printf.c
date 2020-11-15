@@ -31,7 +31,7 @@ int		ft_printf(const restrict char *format, ...)
 			else if (format[i] == 's')
 				n += ft_putstr_fd(va_arg(ap, char*), 1);
 			else if (format[i] == 'p')
-				n += ft_putnmb_fd((long)va_arg(ap, void*), 1);
+				n += ft_putfmt_fd((long)va_arg(ap, void*), 1, 'x');
 			else if	(ft_strchr("di", format[i]))
 				n += ft_putnbr_fd(va_arg(ap, int), 1);
 			else if	(ft_strchr("uxX", format[i]))
