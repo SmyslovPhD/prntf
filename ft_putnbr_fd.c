@@ -6,26 +6,32 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/09 20:35:44 by kbraum            #+#    #+#             */
-/*   Updated: 2020/11/09 21:37:44 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/16 18:14:37 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	ft_putnbr_fd(int n, int fd)
+int	ft_putnbr_fd(long n, int fd)
 {
-	int		m;
+	int		i;
+	long	m;
 	char	c;
 
-	m = n < 0 ? -1 : 1;
-	while ((long)n / m > 9)
+	m = 1;
+	i = 0;
+	while (n / m > 9 || n / m < -9)
 		m *= 10;
 	if (n < 0)
+	{
 		ft_putchar_fd('-', fd);
+		m *= -1;
+	}
 	while (m != 0)
 	{
-		c = (long)n / m % 10 + '0';
-		ft_putchar_fd(c, fd);
+		c = n / m % 10 + '0';
+		i += write(fd, &c, 1);
 		m /= 10;
 	}
+	return (i);
 }
