@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/17 19:36:44 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/17 20:24:02 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/17 22:01:37 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ int		ft_putfmt_fd(unsigned long nbr, int fd, char c)
 		m *= base;
 	while (m != 0)
 	{
-		i += ft_putchar_fd(ftm[nbr / m % base], fd);
+		i += write(1, ftm[nbr / m % base], 1);
 		m /= base;
 	}
 	return (i);
