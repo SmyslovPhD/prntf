@@ -6,12 +6,12 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/17 21:25:50 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/17 22:55:26 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
-#include <stdio.h>
+
 int		ft_printf(const char *format, ...)
 {
 	int		n;
