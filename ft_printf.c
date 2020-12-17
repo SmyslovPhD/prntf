@@ -6,13 +6,13 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/16 21:21:24 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/17 21:25:50 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
-
-int		ft_printf(const restrict char *format, ...)
+#include <stdio.h>
+int		ft_printf(const char *format, ...)
 {
 	int		n;
 	size_t	i;
@@ -20,28 +20,30 @@ int		ft_printf(const restrict char *format, ...)
 
 	va_start(ap, format);
 	i = 0;
+	n = 0;
 	while (format[i])
 	{
 		if (format[i] == '%')
 		{
 			i++;
-			/*TODO int vmesto void dlya vseh put'ov*/
 			if (format[i] == 'c')
-				n += ft_putchr_fd(va_arg(ap, char), 1);
+				n += ft_putchar_fd(va_arg(ap, int), 1);
 			else if (format[i] == 's')
 				n += ft_putstr_fd(va_arg(ap, char*), 1);
 			else if (format[i] == 'p')
-				n += ft_putfmt_fd((long)va_arg(ap, void*), 1, 'x');
+				n += ft_putstr_fd("0x", 1) +
+					ft_putfmt_fd((unsigned long)va_arg(ap, void*), 1, 'x');
 			else if	(ft_strchr("di", format[i]))
 				n += ft_putnbr_fd(va_arg(ap, int), 1);
 			else if	(ft_strchr("uxX", format[i]))
-				/*TODO SOZDAT FUNCTION ft_putfmt_fd*/
-				n += ft_putfmt_fd(va_arg(ap, unsigned int), 1, fotmat[i]);
+				n += ft_putfmt_fd(va_arg(ap, unsigned int), 1, format[i]);
 			else if (format[i] == '%' || format[i] == '\0')
-				n += ft_putchr_fd('%', 1);
+				n += ft_putchar_fd('%', 1);
 		}
 		else
-			n += ft_putchar(format[i]);
+			n += ft_putchar_fd(format[i], 1);
 		i++;
 	}
+	va_end(ap);
+	return (n);
 }

@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/09 19:15:45 by kbraum            #+#    #+#             */
-/*   Updated: 2020/11/09 20:20:50 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/17 20:20:02 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,5 +14,6 @@
 
 int		ft_putchar_fd(char c, int fd)
 {
-	return (write(fd, &c, sizeof(c)));
+	write(fd, &c, sizeof(c));
+	return (1);
 }
