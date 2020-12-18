@@ -1,7 +1,3 @@
-SRCS_DIR	= src/
-
-OBJS_DIR	= obj/
-
 SRCS 		= ft_memset.c \
 			  ft_bzero.c \
 			  ft_memcpy.c \
@@ -32,10 +28,14 @@ SRCS 		= ft_memset.c \
 			  ft_split.c \
 			  ft_itoa.c \
 			  ft_strmapi.c \
+			  ft_printf.c \
+			  ft_order.c \
 			  ft_putchar_fd.c \
 			  ft_putstr_fd.c \
 			  ft_putendl_fd.c \
+			  ft_putfmt_fd.c \
 			  ft_putnbr_fd.c \
+			  ft_pow.c \
 			  ft_lstnew.c \
 			  ft_lstadd_front.c \
 			  ft_lstsize.c \
@@ -48,7 +48,7 @@ SRCS 		= ft_memset.c \
 
 OBJS		= ${SRCS:.c=.o} 
 
-NAME		= libftprintf.a
+NAME		= printf.a
 
 CC			= gcc
 

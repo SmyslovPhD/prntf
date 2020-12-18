@@ -6,18 +6,11 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/08 18:59:46 by kbraum            #+#    #+#             */
-/*   Updated: 2020/11/09 18:46:07 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/18 20:56:10 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
-
-static long	ft_pow(long n, size_t power)
-{
-	if (power == 0)
-		return (1);
-	return (n * ft_pow(n, power - 1));
-}
 
 char		*ft_itoa(int n)
 {

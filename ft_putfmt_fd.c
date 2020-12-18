@@ -6,16 +6,11 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/17 19:36:44 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/17 22:01:37 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/18 21:11:04 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
-
-/*
- *	ft_putfmt_fd;
- *	kogda len' pisat' dlya octal
- */
 
 int		ft_putfmt_fd(unsigned long nbr, int fd, char c)
 {
@@ -34,7 +29,7 @@ int		ft_putfmt_fd(unsigned long nbr, int fd, char c)
 		m *= base;
 	while (m != 0)
 	{
-		i += write(1, ftm[nbr / m % base], 1);
+		i += write(1, &(ftm[nbr / m % base]), 1);
 		m /= base;
 	}
 	return (i);

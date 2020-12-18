@@ -6,43 +6,47 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/17 23:07:26 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/18 21:32:23 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int		ft_printf(const char *format, ...)
+static int	ft_printf_conv(va_list ap, const char *format)
 {
 	int		n;
-	size_t	i;
+
+	n = 0;
+	if (*format == 'c')
+		n += ft_putchar_fd(va_arg(ap, int), 1);
+	else if (*format == 's')
+		n += ft_putstr_fd(va_arg(ap, char*), 1);
+	else if (*format == 'p')
+		n += ft_putstr_fd("0x", 1) +
+		ft_putfmt_fd((unsigned long)va_arg(ap, void*), 1, 'x');
+	else if (ft_strchr("di", *format))
+		n += ft_putnbr_fd(va_arg(ap, int), 1);
+	else if (ft_strchr("uxX", *format))
+		n += ft_putfmt_fd(va_arg(ap, unsigned int), 1, *format);
+	else if (*format == '%' || *format == '\0')
+		n += ft_putchar_fd('%', 1);
+	return (n);
+}
+
+int			ft_printf(const char *format, ...)
+{
 	va_list	ap;
+	int		n;
 
 	va_start(ap, format);
-	i = 0;
 	n = 0;
-	while (format[i])
+	while (*format)
 	{
-		if (format[i] == '%')
-		{
-			i++;
-			if (format[i] == 'c')
-				n += ft_putchar_fd(va_arg(ap, int), 1);
-			else if (format[i] == 's')
-				n += ft_putstr_fd(va_arg(ap, char*), 1);
-			else if (format[i] == 'p')
-				n += ft_putstr_fd("0x", 1) +
-					ft_putfmt_fd((unsigned long)va_arg(ap, void*), 1, 'x');
-			else if	(ft_strchr("di", format[i]))
-				n += ft_putnbr_fd(va_arg(ap, int), 1);
-			else if	(ft_strchr("uxX", format[i]))
-				n += ft_putfmt_fd(va_arg(ap, unsigned int), 1, format[i]);
-			else if (format[i] == '%' || format[i] == '\0')
-				n += ft_putchar_fd('%', 1);
-		}
+		if (*format == '%')
+			ft_printf_conv(ap, ++format);
 		else
-			n += ft_putchar_fd(format[i], 1);
-		i++;
+			n += write(1, format, 1);
+		format++;
 	}
 	va_end(ap);
 	return (n);
