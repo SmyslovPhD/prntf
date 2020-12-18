@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/01 16:15:20 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/17 20:42:09 by kbraum           ###   ########.fr       */
+/*   Updated: 2020/12/18 19:18:57 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ int					ft_putstr_fd(char *s, int fd);
 int					ft_putendl_fd(char *s, int fd);
 int					ft_putnbr_fd(long n, int fd);
 int					ft_putfmt_fd(unsigned long nbr, int fd, char c);
+int					ft_pow(int n, size_t i);
+int					ft_order_base(int nbr, int base);
 t_list				*ft_lstnew(void *content);
 void				ft_lstadd_front(t_list **lst, t_list *new);
 t_list				*ft_lstlast(t_list *lst);
