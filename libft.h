@@ -57,6 +57,7 @@ char				*ft_strjoin(char const *s1, char const *s2);
 char				*ft_strtrim(char const *s1, char const *set);
 char				**ft_split(char const *s, char c);
 char				*ft_itoa(int n);
+char				*ft_lutof(unsigned long nbr, char c);
 char				*ft_strmapi(char const *s,
 						char (*f)(unsigned int, char));
 int					ft_putchar_fd(char c, int fd);
@@ -66,6 +67,7 @@ int					ft_putnbr_fd(long n, int fd);
 int					ft_putfmt_fd(unsigned long nbr, int fd, char c);
 int					ft_order_base(int nbr, int base);
 int					ft_pow(int n, size_t i);
+unsigned long		ft_powlu(unsigned long n, size_t i);
 t_list				*ft_lstnew(void *content);
 void				ft_lstadd_front(t_list **lst, t_list *new);
 t_list				*ft_lstlast(t_list *lst);
