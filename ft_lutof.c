@@ -1,5 +1,6 @@
+/*TODO Add H42 */
 #include "libft.h"
-#include <stdio.h>
+
 static unsigned long	ft_ltof_base(char c)
 {
 	if (c == 'X' || c == 'x')
