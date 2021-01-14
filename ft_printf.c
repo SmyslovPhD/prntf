@@ -10,9 +10,17 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "ft_printf.h"
 
-static char	*ft_printf_str(va_list ap, char c)
+static char *ft_printf_conv_param(char *format, int *width, int *prec, va_list ap)
+{
+	*width = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
+	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
+		format++;
+	if (*format
+}
+
+static char	*ft_printf_conv_str(va_list ap, char c)
 {
 	char	*s;
 	char	*tmp;
@@ -43,24 +51,17 @@ static int	ft_printf_conv(va_list ap, const char *format)
 	char	*s;
 
 	n = 0;
-	width = ft_atoi(format);
-	while (ft_isdigit(*format) || *format == '-')
-			format++;
-	s = ft_printf_str(ap, *format);
+	format = ft_printf_conv_params(format, &width, &prec, &ap);
+	while (ft_isdigit(*format) || ft_strchr(".*-", *format))
+		format++;
+	s = ft_printf_conv_str(ap, *format);
 	if (s == 0)
 		return (-1);
-	if (width >= 0)
-	{
-		while ((width-- - (int)ft_strlen(s)) > 0)
-			n += ft_putchar_fd(' ', 1);
-		n += ft_putstr_fd(s, 1);
-	}
-	else
-	{
-		n += ft_putstr_fd(s, 1);
-		while ((width++ + (int)ft_strlen(s)) < 0)
-			n += ft_putchar_fd(' ', 1);
-	}
+	while (width > 0 && (width-- - (int)ft_strlen(s)) > 0)
+		n += ft_putchar_fd(' ', 1);
+	n += ft_putstr_fd(s, 1);
+	while (width < 0 && (width++ + (int)ft_strlen(s)) < 0)
+		n += ft_putchar_fd(' ', 1);
 	free(s);
 	return (n);
 }
