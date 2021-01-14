@@ -12,12 +12,16 @@
 
 #include "ft_printf.h"
 
-static char *ft_printf_conv_param(char *format, int *width, int *prec, va_list ap)
+static char *ft_printf_conv_param(char *format, int *width, int *prec, va_list *ap)
 {
-	*width = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
+	*width = *format == '*' ? va_arg(*ap, int) : ft_atoi(format);
 	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
 		format++;
-	if (*format
+	format += *format == '.';
+	*prec = *format == '*' ? va_arg(*ap, int) : ft_atoi(format);
+	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
+		format++;
+	return (format);
 }
 
 static char	*ft_printf_conv_str(va_list ap, char c)
@@ -59,7 +63,7 @@ static int	ft_printf_conv(va_list ap, const char *format)
 		return (-1);
 	while (width > 0 && (width-- - (int)ft_strlen(s)) > 0)
 		n += ft_putchar_fd(' ', 1);
-	n += ft_putstr_fd(s, 1);
+	n += ft_printf_conv_write
 	while (width < 0 && (width++ + (int)ft_strlen(s)) < 0)
 		n += ft_putchar_fd(' ', 1);
 	free(s);
