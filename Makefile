@@ -13,14 +13,15 @@ AR			= ar rc
 
 CFLAGS		= -Wall -Wextra -Werror -std=c99
 
-.c.o:		
+all:		${NAME}
+
+.c.o:
 			${MAKE} all -C ./libft
-			${CC} ${CFLAGS} -c $< -o ${<:.c=.o} libft/libft.a
+			ranlib libft/libft.a
+			${CC} ${CFLAGS} -c $< -o ${<:.c=.o} -L. -lft
 
 $(NAME):	${OBJS}
 			${AR} ${NAME} ${OBJS}
-
-all:		${NAME}
 
 clean:	
 			${MAKE} clean -C ./libft
