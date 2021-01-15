@@ -21,7 +21,7 @@ all:		${NAME}
 			${CC} ${CFLAGS} -c $< -o ${<:.c=.o} -L. -lft
 
 $(NAME):	${OBJS}
-			${AR} ${NAME} ${OBJS}
+			${AR} ${NAME} ${OBJS} ./libft/*.o
 
 clean:	
 			${MAKE} clean -C ./libft

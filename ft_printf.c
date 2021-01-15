@@ -59,7 +59,7 @@ static char	*ft_printf_conv_prec(char *s, const char c, int prec)
 	if (prec < 0)
 		return (s);
 	if (ft_strchr("diuxX", c))
-		while (prec-- > (int)ft_strlen(s))
+		while (prec > (int)ft_strlen(s))
 		{
 			tmp = s;
 			s = ft_strjoin("0", tmp);
