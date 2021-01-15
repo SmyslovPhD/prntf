@@ -19,6 +19,8 @@ static char *ft_printf_conv_param(char *format, int *width, int *prec, va_list *
 		format++;
 	format += *format == '.';
 	*prec = *format == '*' ? va_arg(*ap, int) : ft_atoi(format);
+	if (*prec == 0 && *format != '*' && ft_atoi(format) == 0)
+		*prec = -1;
 	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
 		format++;
 	return (format);
@@ -29,6 +31,7 @@ static char	*ft_printf_conv_str(va_list ap, char c)
 	char	*s;
 	char	*tmp;
 
+	s = 0;
 	if (c == 'c')
 		s = ft_ctos(va_arg(ap, int));
 	else if (c == 's')
@@ -48,22 +51,42 @@ static char	*ft_printf_conv_str(va_list ap, char c)
 	return (s);
 }
 
+static char	*ft_printf_conv_prec(char *s, const char c, int prec)
+{
+	int	tmp;
+
+	if (prec < 0)
+		return (s);
+	if (ft_strchr("diuxX", c))
+		while (prec-- > ft_strlen(s))
+		{
+			tmp = s;
+			s = ft_strjoin("0", tmp);
+			free (tmp)
+		}
+	if (c == 's' && prec < ft_strlen(s))
+		s[prec] = '\0';
+	return (s);
+}
+
 static int	ft_printf_conv(va_list ap, const char *format)
 {
 	int		n;
 	int		width;
+	int		prec;
 	char	*s;
 
 	n = 0;
 	format = ft_printf_conv_params(format, &width, &prec, &ap);
 	while (ft_isdigit(*format) || ft_strchr(".*-", *format))
 		format++;
-	s = ft_printf_conv_str(ap, *format);
-	if (s == 0)
-		return (-1);
+	s = 0;
+	while (s == 0)
+		s = ft_printf_conv_str(ap, *format);
+	s = ft_printf_conv_prec(s, *format, prec);
 	while (width > 0 && (width-- - (int)ft_strlen(s)) > 0)
 		n += ft_putchar_fd(' ', 1);
-	n += ft_printf_conv_write
+	n += ft_printf_conv_write(format, width, prec);			
 	while (width < 0 && (width++ + (int)ft_strlen(s)) < 0)
 		n += ft_putchar_fd(' ', 1);
 	free(s);
