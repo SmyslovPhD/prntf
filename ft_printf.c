@@ -12,18 +12,19 @@
 
 #include "ft_printf.h"
 
-static char *ft_printf_conv_param(char *format, int *width, int *prec, va_list *ap)
+static char *ft_printf_conv_param(const char *format, int *width, int *prec,
+			va_list ap)
 {
-	*width = *format == '*' ? va_arg(*ap, int) : ft_atoi(format);
+	*width = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
 	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
 		format++;
 	format += *format == '.';
-	*prec = *format == '*' ? va_arg(*ap, int) : ft_atoi(format);
+	*prec = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
 	if (*prec == 0 && *format != '*' && ft_atoi(format) == 0)
 		*prec = -1;
 	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
 		format++;
-	return (format);
+	return ((char*)format);
 }
 
 static char	*ft_printf_conv_str(va_list ap, char c)
@@ -53,18 +54,18 @@ static char	*ft_printf_conv_str(va_list ap, char c)
 
 static char	*ft_printf_conv_prec(char *s, const char c, int prec)
 {
-	int	tmp;
+	char	*tmp;
 
 	if (prec < 0)
 		return (s);
 	if (ft_strchr("diuxX", c))
-		while (prec-- > ft_strlen(s))
+		while (prec-- > (int)ft_strlen(s))
 		{
 			tmp = s;
 			s = ft_strjoin("0", tmp);
-			free (tmp)
+			free(tmp);
 		}
-	if (c == 's' && prec < ft_strlen(s))
+	if (c == 's' && prec < (int)ft_strlen(s))
 		s[prec] = '\0';
 	return (s);
 }
@@ -77,16 +78,16 @@ static int	ft_printf_conv(va_list ap, const char *format)
 	char	*s;
 
 	n = 0;
-	format = ft_printf_conv_params(format, &width, &prec, &ap);
+	format = ft_printf_conv_param(format, &width, &prec, ap);
 	while (ft_isdigit(*format) || ft_strchr(".*-", *format))
-		format++;
+		if (*(format++) == '*')
+			va_arg(ap, int);	
 	s = 0;
-	while (s == 0)
-		s = ft_printf_conv_str(ap, *format);
+	s = ft_printf_conv_str(ap, *format);
 	s = ft_printf_conv_prec(s, *format, prec);
 	while (width > 0 && (width-- - (int)ft_strlen(s)) > 0)
 		n += ft_putchar_fd(' ', 1);
-	n += ft_printf_conv_write(format, width, prec);			
+	n += write(1, s, ft_strlen(s));			
 	while (width < 0 && (width++ + (int)ft_strlen(s)) < 0)
 		n += ft_putchar_fd(' ', 1);
 	free(s);
