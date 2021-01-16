@@ -50,6 +50,8 @@ static char	*ft_printf_conv_str(va_list ap, char c)
 		s = ft_itoa(va_arg(ap, int));
 	if (ft_strchr("uxX", c))
 		s = ft_lutof(va_arg(ap, unsigned int), c);
+	if (s == 0)
+		s = ft_strdup("(null)");
 	return (s);
 }
 
