@@ -35,38 +35,37 @@ static char	*ft_printf_conv_str(va_list ap, char c)
 	s = 0;
 	if (c == 'c')
 		s = ft_ctos(va_arg(ap, int));
-	else if (c == 's')
+	if (c == 's')
 		s = ft_strdup(va_arg(ap, char*));
-	else if (c == 'p')
+	if (c == 'p')
 	{
 		tmp = ft_lutof((unsigned long)va_arg(ap, void*), 'x');
 		s = ft_strjoin("0x", tmp);
 		free(tmp);
 	}
-	else if (c == 'd' || c == 'i')
+	if (c == 'd' || c == 'i')
 		s = ft_itoa(va_arg(ap, int));
-	else if (ft_strchr("uxX", c))
+	if (ft_strchr("uxX", c))
 		s = ft_lutof(va_arg(ap, unsigned int), c);
-	else if (c == '%' || c == '\0')
-		s = ft_strdup("%");
 	return (s);
 }
 
-static char	*ft_printf_conv_prec(char *s, const char c, int prec)
+static char	*ft_printf_conv_prec(char *s, const char c, int prec, int *len)
 {
 	char	*tmp;
 
 	if (prec < 0)
 		return (s);
 	if (ft_strchr("diuxX", c))
-		while (prec > (int)ft_strlen(s))
+		while (prec > *len)
 		{
 			tmp = s;
 			s = ft_strjoin("0", tmp);
+			(*len)++;
 			free(tmp);
 		}
-	if (c == 's' && prec < (int)ft_strlen(s))
-		s[prec] = '\0';
+	if (c == 's' && prec < *len)
+		*len = prec;
 	return (s);
 }
 
@@ -75,20 +74,24 @@ static int	ft_printf_conv(va_list ap, const char *format)
 	int		n;
 	int		width;
 	int		prec;
+	int		len;
 	char	*s;
 
 	n = 0;
 	format = ft_printf_conv_param(format, &width, &prec, ap);
 	while (ft_isdigit(*format) || ft_strchr(".*-", *format))
 		if (*(format++) == '*')
-			va_arg(ap, int);	
+			va_arg(ap, int);
+	if (*format == '%')
+		return (write(1, "%", 1));
 	s = 0;
 	s = ft_printf_conv_str(ap, *format);
-	s = ft_printf_conv_prec(s, *format, prec);
-	while (width > 0 && (width-- - (int)ft_strlen(s)) > 0)
+	len = *format == 'c' ? 1 : ft_strlen(s);
+	s = ft_printf_conv_prec(s, *format, prec, &len);
+	while (width > 0 && (width-- - len > 0))
 		n += ft_putchar_fd(' ', 1);
-	n += write(1, s, ft_strlen(s));			
-	while (width < 0 && (width++ + (int)ft_strlen(s)) < 0)
+	n += write(1, s, len);
+	while (width < 0 && (width++ + len) < 0)
 		n += ft_putchar_fd(' ', 1);
 	free(s);
 	return (n);
@@ -103,7 +106,7 @@ int			ft_printf(const char *format, ...)
 	n = 0;
 	while (*format)
 	{
-		if (*format == '%')
+		if (*format == '%' && *format != '\0')
 		{
 			ft_printf_conv(ap, ++format);
 			while (ft_isdigit(*format) || *format == '-' || *format == '.')
