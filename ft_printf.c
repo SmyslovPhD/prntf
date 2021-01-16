@@ -18,9 +18,12 @@ static char *ft_printf_conv_param(const char *format, int *width, int *prec,
 	*width = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
 	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
 		format++;
-	format += *format == '.';
-	*prec = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
-	if (*prec == 0 && *format != '*' && ft_atoi(format) == 0)
+	if (*format == '.')
+	{
+		format++;
+		*prec = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
+	}
+	else
 		*prec = -1;
 	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
 		format++;
