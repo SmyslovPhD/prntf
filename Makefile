@@ -9,19 +9,22 @@ CC			= gcc
 
 RM			= rm -f
 
-AR			= ar rc
+AR			= ar rcs
 
 CFLAGS		= -Wall -Wextra -Werror -std=c99
+
+LIBFT_F		= ./libft/
+
+LIBFT		= ${LIBFT_F}libft.a
 
 all:		${NAME}
 
 .c.o:
-			${MAKE} all -C ./libft
-			ranlib libft/libft.a
-			${CC} ${CFLAGS} -c $< -o ${<:.c=.o} -L. -lft
+			${MAKE} all -C ${LIBFT_F}
+			${CC} ${CFLAGS} -c $< -o ${<:.c=.o}
 
 $(NAME):	${OBJS}
-			${AR} ${NAME} ${OBJS} ./libft/*.o
+			${AR} ${NAME} ${OBJS} ${LIBFT_F}*.o
 
 clean:	
 			${MAKE} clean -C ./libft

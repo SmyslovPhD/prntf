@@ -6,13 +6,13 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/18 18:40:24 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/18 20:58:01 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/18 21:16:26 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int		ft_pow(int n, size_t i)
+long	ft_pow(int n, size_t i)
 {
 	if (i == 0)
 		return (1);

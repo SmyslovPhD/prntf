@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/18 21:32:23 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/18 21:54:24 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@ static char	*ft_printf_conv_str(va_list ap, char c)
 	char	*tmp;
 
 	s = 0;
-	if (c == 'c')
-		s = ft_ctos(va_arg(ap, int));
+	if (c == 'c' || c == '%')
+		s = ft_ctos(c == 'c' ? va_arg(ap, int) : '%');
 	if (c == 's')
 		s = ft_strdup(va_arg(ap, char*));
 	if (c == 'p')
@@ -61,14 +61,16 @@ static char	*ft_printf_conv_prec(char *s, const char c, int prec, int *len)
 
 	if (prec < 0)
 		return (s);
-	if (ft_strchr("diuxX", c))
-		while (prec > *len)
+	if (ft_strchr("diuxX%", c))
+		while (prec > *len || (ft_strrchr(s, '-') && prec == *len))
 		{
 			tmp = s;
 			s = ft_strjoin("0", tmp);
 			(*len)++;
 			free(tmp);
 		}
+	if (ft_strchr("di", c) && (tmp = ft_strrchr(s, '-')))
+		ft_cswap(s, tmp);
 	if (c == 's' && prec < *len)
 		*len = prec;
 	return (s);
@@ -84,11 +86,9 @@ static int	ft_printf_conv(va_list ap, const char *format)
 
 	n = 0;
 	format = ft_printf_conv_param(format, &width, &prec, ap);
-	while (ft_isdigit(*format) || ft_strchr(".*-", *format))
+	while (ft_isdigit(*format) || ft_strchr(".*+-", *format))
 		if (*(format++) == '*')
 			va_arg(ap, int);
-	if (*format == '%')
-		return (write(1, "%", 1));
 	s = 0;
 	s = ft_printf_conv_str(ap, *format);
 	len = *format == 'c' ? 1 : ft_strlen(s);
@@ -111,11 +111,12 @@ int			ft_printf(const char *format, ...)
 	n = 0;
 	while (*format)
 	{
-		if (*format == '%' && *format != '\0')
+		if (*format == '%' && *(++format) != '\0')
 		{
-			ft_printf_conv(ap, ++format);
-			while (ft_isdigit(*format) || *format == '-' || *format == '.')
-				format++;
+			n += ft_printf_conv(ap, format);
+			while (ft_isdigit(*format) || ft_strchr(".*+-", *format))
+				if (*(format++) == '*')
+					va_arg(ap, int);
 		}
 		else
 			n += write(1, format, 1);

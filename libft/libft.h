@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/01 16:15:20 by kbraum            #+#    #+#             */
-/*   Updated: 2020/12/18 20:58:39 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/18 21:57:37 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int					ft_putendl_fd(char *s, int fd);
 int					ft_putnbr_fd(long n, int fd);
 int					ft_putfmt_fd(unsigned long nbr, int fd, char c);
 int					ft_order_base(int nbr, int base);
-int					ft_pow(int n, size_t i);
+long				ft_pow(int n, size_t i);
 unsigned long		ft_powlu(unsigned long n, size_t i);
 t_list				*ft_lstnew(void *content);
 void				ft_lstadd_front(t_list **lst, t_list *new);
@@ -78,5 +78,6 @@ void				ft_lstclear(t_list **lst, void (*del)(void*));
 void				ft_lstiter(t_list *lst, void (*f)(void *));
 t_list				*ft_lstmap(t_list *lst, void *(*f)(void *),
 						void (*del)(void *));
+void				ft_cswap(char *c1, char *c2);
 
 #endif
