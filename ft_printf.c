@@ -6,23 +6,30 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/18 21:54:24 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/19 23:12:46 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
+#include <stdio.h>
 static char *ft_printf_conv_param(const char *format, int *width, int *prec,
 			va_list ap)
 {
-	*width = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
-	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
-		format++;
-	if (*format == '.')
+	if (*format == '0')
 	{
-		format++;
-		*prec = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
+		*prec = (*++format == '*' ? va_arg(ap, int) : ft_atoi(format)) - 1;
+		while (ft_isdigit(*format) || ft_strchr("*", *format))
+			format++;
 	}
+	*width = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
+	if (*format != '0')
+		while (ft_isdigit(*format) || ft_strchr("+-*", *format))
+			format++;
+	else
+		while (format[1] == '0')
+			format++;
+	if (*format == '.')
+		*prec = *++format == '*' ? va_arg(ap, int) : ft_atoi(format);
 	else
 		*prec = -1;
 	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
