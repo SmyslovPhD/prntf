@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/20 00:42:23 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/20 01:01:51 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,7 @@ static char	*ft_printf_conv_param(const char *format, int *width, int *prec,
 {
 	*prec = -1;
 	if (*format == '0')
-	{
 		*prec = (*++format == '*' ? va_arg(ap, int) : ft_atoi(format)) - 1;
-		while (ft_isdigit(*format) || ft_strchr("*", *format))
-			format++;
-	}
 	*width = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
 	if (*format != '0')
 		while (ft_isdigit(*format) || ft_strchr("+-*", *format))
@@ -74,14 +70,13 @@ static char	*ft_printf_conv_prec(char *s, const char c, int prec, int *len)
 			ft_strlcpy(s, " ", 2);
 			*len = 1;
 		}
-		else
-			while (prec > *len || (ft_strrchr(s, '-') && prec == *len))
-			{
-				tmp = s;
-				s = ft_strjoin("0", tmp);
-				(*len)++;
-				free(tmp);
-			}
+		while (prec > *len || (ft_strrchr(s, '-') && prec == *len))
+		{
+			tmp = s;
+			s = ft_strjoin("0", tmp);
+			(*len)++;
+			free(tmp);
+		}
 	}
 	if (ft_strchr("di", c) && (tmp = ft_strrchr(s, '-')))
 		ft_cswap(s, tmp);
