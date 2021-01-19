@@ -6,15 +6,16 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/19 23:12:46 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/20 00:42:23 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-#include <stdio.h>
-static char *ft_printf_conv_param(const char *format, int *width, int *prec,
-			va_list ap)
+
+static char	*ft_printf_conv_param(const char *format, int *width, int *prec,
+		va_list ap)
 {
+	*prec = -1;
 	if (*format == '0')
 	{
 		*prec = (*++format == '*' ? va_arg(ap, int) : ft_atoi(format)) - 1;
@@ -30,8 +31,6 @@ static char *ft_printf_conv_param(const char *format, int *width, int *prec,
 			format++;
 	if (*format == '.')
 		*prec = *++format == '*' ? va_arg(ap, int) : ft_atoi(format);
-	else
-		*prec = -1;
 	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
 		format++;
 	return ((char*)format);
@@ -69,13 +68,21 @@ static char	*ft_printf_conv_prec(char *s, const char c, int prec, int *len)
 	if (prec < 0)
 		return (s);
 	if (ft_strchr("diuxX%", c))
-		while (prec > *len || (ft_strrchr(s, '-') && prec == *len))
+	{
+		if (prec == 0 && *s == '0')
 		{
-			tmp = s;
-			s = ft_strjoin("0", tmp);
-			(*len)++;
-			free(tmp);
+			ft_strlcpy(s, " ", 2);
+			*len = 1;
 		}
+		else
+			while (prec > *len || (ft_strrchr(s, '-') && prec == *len))
+			{
+				tmp = s;
+				s = ft_strjoin("0", tmp);
+				(*len)++;
+				free(tmp);
+			}
+	}
 	if (ft_strchr("di", c) && (tmp = ft_strrchr(s, '-')))
 		ft_cswap(s, tmp);
 	if (c == 's' && prec < *len)
@@ -100,6 +107,7 @@ static int	ft_printf_conv(va_list ap, const char *format)
 	s = ft_printf_conv_str(ap, *format);
 	len = *format == 'c' ? 1 : ft_strlen(s);
 	s = ft_printf_conv_prec(s, *format, prec, &len);
+	len -= ft_strchr("diuxX%", *format) && width == 0 && prec == 0;
 	while (width > 0 && (width-- - len > 0))
 		n += ft_putchar_fd(' ', 1);
 	n += write(1, s, len);
