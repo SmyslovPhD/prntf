@@ -6,34 +6,31 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/20 01:27:31 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/20 20:35:46 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-static char	*ft_printf_conv_param(const char *format, int *width, int *prec,
-		va_list ap)
+static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *param,
+				va_list ap)
 {
-	if (*format == '0')
-		*prec = *++format == '*' ? va_arg(ap, int) : ft_atoi(format);
+	param->nul_flag = *f == '0';
+	param->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
+	if (*f != '0')
+		while (ft_isdigit(*f) || ft_strchr("+-*", *f))
+			f++;
 	else
-		*prec = -1;
-	*width = *format == '*' ? va_arg(ap, int) : ft_atoi(format);
-	if (*format != '0')
-		while (ft_isdigit(*format) || ft_strchr("+-*", *format))
-			format++;
-	else
-		while (format[1] == '0')
-			format++;
-	if (*format == '.')
-		*prec = *++format == '*' ? va_arg(ap, int) : ft_atoi(format);
-	while (ft_isdigit(*format) || ft_strchr("+-*", *format))
-		format++;
-	return ((char*)format);
+		while (*f == '0')
+			f++;
+	if (*f == '.')
+		param->prec = *++f == '*' ? va_arg(ap, int) : ft_atoi(f);
+	while (ft_isdigit(*f) || ft_strchr("+-*", *f))
+		f++;
+	return (f);
 }
 
-static char	*ft_printf_conv_str(va_list ap, char c)
+static char			*ft_printf_conv_str(va_list ap, char c)
 {
 	char	*s;
 	char	*tmp;
@@ -58,59 +55,57 @@ static char	*ft_printf_conv_str(va_list ap, char c)
 	return (s);
 }
 
-static char	*ft_printf_conv_prec(char *s, const char c, int prec, int *len)
+static char			*ft_printf_conv_prec(char *s, const char c,
+				t_ftprintf_data *param)
 {
 	char	*tmp;
 
-	if (prec < 0)
+	if (param->prec < 0)
 		return (s);
 	if (ft_strchr("diuxX%", c))
 	{
-		if (prec == 0 && *s == '0')
-			*len = ft_strlcpy(s, " ", 2);
-		while (prec > *len || (ft_strrchr(s, '-') && prec == *len))
+		if (param->prec == 0 && *s == '0')
+			param->len = ft_strlcpy(s, " ", 2);
+		param->prec -= param->nul_flag && *s == '-';
+		while (param->prec > param->len ||
+			(ft_strrchr(s, '-') && param->prec == param->len))
 		{
 			tmp = s;
 			s = ft_strjoin("0", tmp);
-			(*len)++;
+			param->len++;
 			free(tmp);
 		}
 	}
 	if (ft_strchr("di", c) && (tmp = ft_strrchr(s, '-')))
 		ft_cswap(s, tmp);
-	if (c == 's' && prec < *len)
-		*len = prec;
+	if (c == 's' && param->prec < param->len)
+		param->len = param->prec;
 	return (s);
 }
 
-static int	ft_printf_conv(va_list ap, const char *format)
+static int			ft_printf_conv(va_list ap, const char *format)
 {
-	int		n;
-	int		width;
-	int		prec;
-	int		len;
-	char	*s;
+	int				n;
+	char			*s;
+	t_ftprintf_data	param;
 
 	n = 0;
-	format = ft_printf_conv_param(format, &width, &prec, ap);
-	while (ft_isdigit(*format) || ft_strchr(".*+-", *format))
-		if (*(format++) == '*')
-			va_arg(ap, int);
-	s = 0;
+	format = ft_printf_conv_param(format, &param, ap);
 	s = ft_printf_conv_str(ap, *format);
-	len = *format == 'c' ? 1 : ft_strlen(s);
-	s = ft_printf_conv_prec(s, *format, prec, &len);
-	len -= ft_strchr("diuxX%", *format) && width == 0 && prec == 0;
-	while (width > 0 && (width-- - len > 0))
+	param.len = *format == 'c' ? 1 : ft_strlen(s);
+	s = ft_printf_conv_prec(s, *format, &param);
+	param.len -= ft_strchr("diuxX%", *format) &&
+		param.width == 0 && param.prec == 0;
+	while (param.width > 0 && (param.width-- - param.len > 0))
 		n += ft_putchar_fd(' ', 1);
-	n += write(1, s, len);
-	while (width < 0 && (width++ + len) < 0)
+	n += write(1, s, param.len);
+	while (param.width < 0 && (param.width++ + param.len) < 0)
 		n += ft_putchar_fd(' ', 1);
 	free(s);
 	return (n);
 }
 
-int			ft_printf(const char *format, ...)
+int					ft_printf(const char *format, ...)
 {
 	va_list	ap;
 	int		n;
