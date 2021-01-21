@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/21 22:58:49 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/21 23:36:15 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,17 @@ static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 	while (*f == '0')
 		f++;
 	p->flag = *f == '-' ? FLAG_M : p->flag;
-	f += *f == '-';
+	while (*f == '-')
+		f++;
 	p->width = *f == '*' ? va_arg(ap, int): ft_atoi(f);
-	p->width *= p->flag & FLAG_M ? -1 : 1;  
+	p->width = p->flag & FLAG_M ? -ft_abs(p->width) : p->width;
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
-	p->flag = *f == '.' ?  (p->flag && !FLAG_N) | FLAG_D : p->flag;
+	p->flag = *f == '.' ? (p->flag && !FLAG_N) | FLAG_D : p->flag;
 	f += *f == '.';
 	if (p->flag & FLAG_D)
 		p->prec = *f == '*' ? va_arg(ap, int): ft_atoi(f);
-	else if (p->flag & FLAG_N)
+	else if (p->flag & FLAG_N && p->width != 0)
 		p->prec = p->width;
 	else
 		p->prec = -1;
