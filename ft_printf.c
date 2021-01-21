@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/21 22:26:45 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/21 22:58:49 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 	f += *f == '-';
 	p->width = *f == '*' ? va_arg(ap, int): ft_atoi(f);
 	p->width *= p->flag & FLAG_M ? -1 : 1;  
-	while (ft_isdigit(*f))
+	while (ft_isdigit(*f) || *f == '*')
 		f++;
 	p->flag = *f == '.' ?  (p->flag && !FLAG_N) | FLAG_D : p->flag;
 	f += *f == '.';
@@ -32,7 +32,7 @@ static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 		p->prec = p->width;
 	else
 		p->prec = -1;
-	while (ft_isdigit(*f))
+	while (ft_isdigit(*f) || *f == '*')
 		f++;
 	return (f);
 }
@@ -73,6 +73,8 @@ static char			*ft_printf_conv_prec(char *s, const char c,
 		p->len = p->prec;
 	if (ft_strchr("diuxXp%", c))
 	{
+		if (p->prec == 0)
+			p->len = ft_strlcpy(s, " ", 2) - 1;
 		p->prec += *s == '-' && !(p->flag & FLAG_N);
 		while (p->prec > p->len)
 		{
