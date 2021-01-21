@@ -6,26 +6,33 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/20 20:35:46 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/21 22:26:45 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
-static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *param,
-				va_list ap)
+#include <stdio.h>
+static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
+			va_list ap)
 {
-	param->nul_flag = *f == '0';
-	param->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
-	if (*f != '0')
-		while (ft_isdigit(*f) || ft_strchr("+-*", *f))
-			f++;
+	p->flag = *f == '0' ? FLAG_N : 0;
+	while (*f == '0')
+		f++;
+	p->flag = *f == '-' ? FLAG_M : p->flag;
+	f += *f == '-';
+	p->width = *f == '*' ? va_arg(ap, int): ft_atoi(f);
+	p->width *= p->flag & FLAG_M ? -1 : 1;  
+	while (ft_isdigit(*f))
+		f++;
+	p->flag = *f == '.' ?  (p->flag && !FLAG_N) | FLAG_D : p->flag;
+	f += *f == '.';
+	if (p->flag & FLAG_D)
+		p->prec = *f == '*' ? va_arg(ap, int): ft_atoi(f);
+	else if (p->flag & FLAG_N)
+		p->prec = p->width;
 	else
-		while (*f == '0')
-			f++;
-	if (*f == '.')
-		param->prec = *++f == '*' ? va_arg(ap, int) : ft_atoi(f);
-	while (ft_isdigit(*f) || ft_strchr("+-*", *f))
+		p->prec = -1;
+	while (ft_isdigit(*f))
 		f++;
 	return (f);
 }
@@ -50,56 +57,51 @@ static char			*ft_printf_conv_str(va_list ap, char c)
 		s = ft_itoa(va_arg(ap, int));
 	if (ft_strchr("uxX", c))
 		s = ft_lutof(va_arg(ap, unsigned int), c);
-	if (s == 0)
+	if (ft_strchr("sp", c) && s == 0)
 		s = ft_strdup("(null)");
 	return (s);
 }
 
 static char			*ft_printf_conv_prec(char *s, const char c,
-				t_ftprintf_data *param)
+				t_ftprintf_data *p)
 {
 	char	*tmp;
 
-	if (param->prec < 0)
+	if (p->prec < 0)
 		return (s);
-	if (ft_strchr("diuxX%", c))
+	if (c == 's' && p->prec < p->len)
+		p->len = p->prec;
+	if (ft_strchr("diuxXp%", c))
 	{
-		if (param->prec == 0 && *s == '0')
-			param->len = ft_strlcpy(s, " ", 2);
-		param->prec -= param->nul_flag && *s == '-';
-		while (param->prec > param->len ||
-			(ft_strrchr(s, '-') && param->prec == param->len))
+		p->prec += *s == '-' && !(p->flag & FLAG_N);
+		while (p->prec > p->len)
 		{
 			tmp = s;
-			s = ft_strjoin("0", tmp);
-			param->len++;
+			s = ft_strjoin("0", s);
 			free(tmp);
+			p->len++;
 		}
+		if ((tmp = ft_strchr(s, c == 'p' ? 'x' : '-')))
+			ft_cswap(s + (c == 'p'), tmp);
 	}
-	if (ft_strchr("di", c) && (tmp = ft_strrchr(s, '-')))
-		ft_cswap(s, tmp);
-	if (c == 's' && param->prec < param->len)
-		param->len = param->prec;
 	return (s);
 }
 
-static int			ft_printf_conv(va_list ap, const char *format)
+static int			ft_printf_conv(va_list ap, const char *f)
 {
 	int				n;
 	char			*s;
-	t_ftprintf_data	param;
+	t_ftprintf_data	p;
 
 	n = 0;
-	format = ft_printf_conv_param(format, &param, ap);
-	s = ft_printf_conv_str(ap, *format);
-	param.len = *format == 'c' ? 1 : ft_strlen(s);
-	s = ft_printf_conv_prec(s, *format, &param);
-	param.len -= ft_strchr("diuxX%", *format) &&
-		param.width == 0 && param.prec == 0;
-	while (param.width > 0 && (param.width-- - param.len > 0))
+	f = ft_printf_conv_param(f, &p, ap);
+	s = ft_printf_conv_str(ap, *f);
+	p.len = *f == 'c' ? 1 : ft_strlen(s);
+	s = ft_printf_conv_prec(s, *f, &p);
+	while (p.width > 0 && (p.width-- - p.len > 0))
 		n += ft_putchar_fd(' ', 1);
-	n += write(1, s, param.len);
-	while (param.width < 0 && (param.width++ + param.len) < 0)
+	n += write(1, s, p.len);
+	while (p.width < 0 && (p.width++ + p.len) < 0)
 		n += ft_putchar_fd(' ', 1);
 	free(s);
 	return (n);
