@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/22 18:39:35 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/22 22:43:17 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,12 @@
 static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 			va_list ap)
 {
-	p->flag = *f == '0' ? FLAG_N : 0;
-	while (*f == '0')
+	while (*f == '0' || *f == '-')
+	{
+		p->flag = *f == '0' ? FLAG_N | p->flag : p->flag;
+		p->flag = *f == '-' ? FLAG_M : p->flag;
 		f++;
-	p->flag = *f == '-' ? FLAG_M : p->flag;
+	}
 	while (*f == '-')
 		f++;
 	p->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
