@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/22 22:43:17 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/22 22:47:41 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,11 @@ static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 		f++;
 	p->flag = *f == '.' ? (p->flag && !FLAG_N) | FLAG_D : p->flag;
 	f += *f == '.';
+	p->prec = -1;
 	if (p->flag & FLAG_D)
 		p->prec = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
-	else if (p->flag & FLAG_N && p->width)
+	if (p->flag & FLAG_N && p->width && p->prec < 0)
 		p->prec = p->width;
-	else
-		p->prec = -1;
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
 	return (f);
@@ -126,8 +125,7 @@ int					ft_printf(const char *format, ...)
 		{
 			n += ft_printf_conv(ap, format);
 			while (ft_isdigit(*format) || ft_strchr(".*+-", *format))
-				if (*(format++) == '*')
-					va_arg(ap, int);
+				format++;
 		}
 		else
 			n += write(1, format, 1);
