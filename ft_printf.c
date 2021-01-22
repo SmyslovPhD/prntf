@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/21 23:36:15 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/22 18:39:35 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,15 +21,15 @@ static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 	p->flag = *f == '-' ? FLAG_M : p->flag;
 	while (*f == '-')
 		f++;
-	p->width = *f == '*' ? va_arg(ap, int): ft_atoi(f);
+	p->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
 	p->width = p->flag & FLAG_M ? -ft_abs(p->width) : p->width;
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
 	p->flag = *f == '.' ? (p->flag && !FLAG_N) | FLAG_D : p->flag;
 	f += *f == '.';
 	if (p->flag & FLAG_D)
-		p->prec = *f == '*' ? va_arg(ap, int): ft_atoi(f);
-	else if (p->flag & FLAG_N && p->width != 0)
+		p->prec = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
+	else if (p->flag & FLAG_N && p->width)
 		p->prec = p->width;
 	else
 		p->prec = -1;
@@ -56,7 +56,7 @@ static char			*ft_printf_conv_str(va_list ap, char c)
 	}
 	if (c == 'd' || c == 'i')
 		s = ft_itoa(va_arg(ap, int));
-	if (ft_strchr("uxX", c))
+	if (ft_strchr("ouxX", c))
 		s = ft_lutof(va_arg(ap, unsigned int), c);
 	if (ft_strchr("sp", c) && s == 0)
 		s = ft_strdup("(null)");
@@ -70,13 +70,14 @@ static char			*ft_printf_conv_prec(char *s, const char c,
 
 	if (p->prec < 0)
 		return (s);
-	if (c == 's' && p->prec < p->len)
+	if (c == 's' && p->flag & FLAG_D && p->prec < p->len)
 		p->len = p->prec;
-	if (ft_strchr("diuxXp%", c))
+	if (ft_strchr("diouxXp%", c) || (c == 's' && p->flag & FLAG_N))
 	{
-		if (p->prec == 0)
-			p->len = ft_strlcpy(s, " ", 2) - 1;
+		if (c != 's' && p->prec == 0)
+			p->len = c != 'p' ? ft_strlcpy(s, " ", 2) - 1 : 2;
 		p->prec += *s == '-' && !(p->flag & FLAG_N);
+		p->prec += (c == 'p') * 2;
 		while (p->prec > p->len)
 		{
 			tmp = s;
