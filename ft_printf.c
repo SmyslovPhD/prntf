@@ -6,26 +6,26 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/22 22:00:47 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/22 18:39:35 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
+#include <stdio.h>
 static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 			va_list ap)
 {
-	while (*f == '0' || *f == '-')
-	{
-		p->flag = *f == '0' ? p->flag | FLAG_N : 0;
-		p->flag = *f == '-' || p->flag & FLAG_M ? FLAG_M : p->flag;
+	p->flag = *f == '0' ? FLAG_N : 0;
+	while (*f == '0')
 		f++;
-	}
+	p->flag = *f == '-' ? FLAG_M : p->flag;
+	while (*f == '-')
+		f++;
 	p->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
 	p->width = p->flag & FLAG_M ? -ft_abs(p->width) : p->width;
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
-	p->flag = *f == '.' ? (p->flag) | FLAG_D : p->flag;
+	p->flag = *f == '.' ? (p->flag && !FLAG_N) | FLAG_D : p->flag;
 	f += *f == '.';
 	if (p->flag & FLAG_D)
 		p->prec = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
@@ -72,10 +72,10 @@ static char			*ft_printf_conv_prec(char *s, const char c,
 		return (s);
 	if (c == 's' && p->flag & FLAG_D && p->prec < p->len)
 		p->len = p->prec;
-	if (ft_strchr("diouxXp%", c))
+	if (ft_strchr("diouxXp%", c) || (c == 's' && p->flag & FLAG_N))
 	{
-		if (c != 's' && p->prec == 0 && *s == '0')
-			p->len = c == 'p' ? 2 : ft_strlcpy(s, " ", 2) - 1;
+		if (c != 's' && p->prec == 0)
+			p->len = c != 'p' ? ft_strlcpy(s, " ", 2) - 1 : 2;
 		p->prec += *s == '-' && !(p->flag & FLAG_N);
 		p->prec += (c == 'p') * 2;
 		while (p->prec > p->len)
@@ -124,7 +124,8 @@ int					ft_printf(const char *format, ...)
 		{
 			n += ft_printf_conv(ap, format);
 			while (ft_isdigit(*format) || ft_strchr(".*+-", *format))
-				format++;	
+				if (*(format++) == '*')
+					va_arg(ap, int);
 		}
 		else
 			n += write(1, format, 1);
