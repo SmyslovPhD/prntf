@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/23 19:57:49 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/23 20:46:10 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 	p->width = p->flag & FLAG_M ? -ft_abs(p->width) : p->width;
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
-	p->flag = *f == '.' ? (p->flag && !FLAG_N) | FLAG_D : p->flag;
+	p->flag = *f == '.' ? (p->flag & !FLAG_N) | FLAG_D : p->flag;
 	f += *f == '.';
 	p->prec = -1;
 	if (p->flag & FLAG_D)
