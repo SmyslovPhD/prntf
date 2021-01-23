@@ -6,12 +6,12 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/22 22:47:41 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/23 16:54:46 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-#include <stdio.h>
+
 static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 			va_list ap)
 {
@@ -32,7 +32,7 @@ static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 	p->prec = -1;
 	if (p->flag & FLAG_D)
 		p->prec = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
-	if (p->flag & FLAG_N && p->width && p->prec < 0)
+	else if ((p->flag & FLAG_N && p->width))
 		p->prec = p->width;
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
@@ -75,7 +75,7 @@ static char			*ft_printf_conv_prec(char *s, const char c,
 		p->len = p->prec;
 	if (ft_strchr("diouxXp%", c) || (c == 's' && p->flag & FLAG_N))
 	{
-		if (c != 's' && p->prec == 0)
+		if (*s == '0' && p->prec == 0 && c != 's')
 			p->len = c != 'p' ? ft_strlcpy(s, " ", 2) - 1 : 2;
 		p->prec += *s == '-' && !(p->flag & FLAG_N);
 		p->prec += (c == 'p') * 2;
