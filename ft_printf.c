@@ -6,14 +6,14 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/24 22:16:33 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/24 22:24:42 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
-			va_list ap)
+static const char	*ft_printf_conv_param(const char *f, va_list ap,
+		t_ftprintf_data *p)
 {
 	while (*f == '0' || *f == '-')
 	{
@@ -64,8 +64,9 @@ static char			*ft_printf_conv_str(va_list ap, char c)
 }
 
 static char			*ft_printf_conv_prec(char *s, const char c,
-				t_ftprintf_data *p)
+		t_ftprintf_data *p)
 {
+	return (s);
 }
 
 static int			ft_printf_conv(const char *f, va_list ap)
@@ -78,7 +79,6 @@ static int			ft_printf_conv(const char *f, va_list ap)
 	f = ft_printf_conv_param(f, ap, &p);
 	s = ft_printf_conv_str(*f, ap);
 	p.len = *f == 'c' ? 1 : ft_strlen(s);
-	p.flag -= ((p.flag & ~FLAG_N) && ft_strchr("diouxX", *f)) * FLAG_N
 	s = ft_printf_conv_prec(s, *f, &p);
 	while ((p.flag & ~FLAG_N) && p.width-- < p.len)
 		n += write(1, " ", 1);
