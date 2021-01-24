@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/23 20:46:10 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/24 22:16:33 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,23 +17,24 @@ static const char	*ft_printf_conv_param(const char *f, t_ftprintf_data *p,
 {
 	while (*f == '0' || *f == '-')
 	{
-		p->flag = *f == '0' ? FLAG_N | p->flag : p->flag;
-		p->flag = *f == '-' ? FLAG_M : p->flag;
-		f++;
+		p->flag = *f == '-' ? p->flag | FLAG_M : p->flag;
+		p->flag = *f == '0' ? p->flag | FLAG_N: p->flag;
 	}
-	p->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
-	p->width = p->flag & FLAG_M ? -ft_abs(p->width) : p->width;
-	while (ft_isdigit(*f) || *f == '*')
+	p->width = *f == '*' ? va_arg(ap, int): ft_atoi(f);
+	p->flag &= (p->flag & FLAG_M || p->width < 0) * ~FLAG_N;
+	p->width = ft_abs(p->width);
+	while (ft_isdidit(*f) || *f == '0')
 		f++;
-	p->flag = *f == '.' ? (p->flag & !FLAG_N) | FLAG_D : p->flag;
+	f->flag |= (*f == '.') * FLAG_D;
 	f += *f == '.';
-	p->prec = -1;
-	if (p->flag & FLAG_D)
-		p->prec = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
-	else if ((p->flag & FLAG_N && p->width))
-		p->prec = p->width;
-	while (ft_isdigit(*f) || *f == '*')
+	if (f->flag & FLAG_D)
+		p->prec = *f == '*' ? va_arg(ap, int) : prec;
+	while (ft_isdidit(*f) || *f == '0')
 		f++;
+	if (ft_strchr("diouxX",*f) && p->flag & FLAG_D || ft_strchr("spc", *f))
+		p->flag &= ~FLAG_N;
+	if (p->flag & FLAG_N)
+		p->prec = p->width;
 	return (f);
 }
 
@@ -65,69 +66,47 @@ static char			*ft_printf_conv_str(va_list ap, char c)
 static char			*ft_printf_conv_prec(char *s, const char c,
 				t_ftprintf_data *p)
 {
-	char	*tmp;
-
-	if (p->prec < 0)
-		return (s);
-	if (c == 's' && p->flag & FLAG_D && p->prec < p->len)
-		p->len = p->prec;
-	if (ft_strchr("diouxXp%", c) || (c == 's' && p->flag & FLAG_N))
-	{
-		if (*s == '0' && p->prec == 0 && c != 's')
-			p->len = c != 'p' ? ft_strlcpy(s, " ", 2) - 1 : 2;
-		p->prec += *s == '-' && !(p->flag & FLAG_N);
-		p->prec += (c == 'p') * 2;
-		while (p->prec > p->len)
-		{
-			tmp = s;
-			s = ft_strjoin("0", s);
-			free(tmp);
-			p->len++;
-		}
-		if ((tmp = ft_strchr(s, c == 'p' ? 'x' : '-')))
-			ft_cswap(s + (c == 'p'), tmp);
-	}
-	return (s);
 }
 
-static int			ft_printf_conv(va_list ap, const char *f)
+static int			ft_printf_conv(const char *f, va_list ap)
 {
+	t_ftprintf_data	p;
 	int				n;
 	char			*s;
-	t_ftprintf_data	p;
 
 	n = 0;
-	f = ft_printf_conv_param(f, &p, ap);
-	s = ft_printf_conv_str(ap, *f);
+	f = ft_printf_conv_param(f, ap, &p);
+	s = ft_printf_conv_str(*f, ap);
 	p.len = *f == 'c' ? 1 : ft_strlen(s);
+	p.flag -= ((p.flag & ~FLAG_N) && ft_strchr("diouxX", *f)) * FLAG_N
 	s = ft_printf_conv_prec(s, *f, &p);
-	while (p.width > 0 && (p.width-- - p.len > 0))
-		n += ft_putchar_fd(' ', 1);
+	while ((p.flag & ~FLAG_N) && p.width-- < p.len)
+		n += write(1, " ", 1);
 	n += write(1, s, p.len);
-	while (p.width < 0 && (p.width++ + p.len) < 0)
-		n += ft_putchar_fd(' ', 1);
-	free(s);
+	while (p.flag & FLAG_M && p.width-- < p.len)
+		n += write(1, " ", 1);
+	free(s); 
 	return (n);
 }
 
-int					ft_printf(const char *format, ...)
+int					ft_printf(const char *f, ...)
 {
 	va_list	ap;
 	int		n;
 
 	va_start(ap, format);
 	n = 0;
-	while (*format)
+	while (*f)
 	{
-		if (*format == '%' && *(++format) != '\0')
+		if (*f == '%' && f[1] != '\0')
 		{
-			n += ft_printf_conv(ap, format);
-			while (ft_isdigit(*format) || ft_strchr(".*+-", *format))
-				format++;
+			n += ft_printf_conv(++f, ap);
+			while (ft_isdigit(*f) || ft_strchr(".*-", *f))
+				f++;
+			f++
 		}
 		else
-			n += write(1, format, 1);
-		format++;
+			n += write(1, f++, 1);
 	}
 	va_end(ap);
 	return (n);
