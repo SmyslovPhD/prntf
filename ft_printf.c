@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/24 22:24:42 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/24 22:50:47 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,18 +27,19 @@ static const char	*ft_printf_conv_param(const char *f, va_list ap,
 		f++;
 	f->flag |= (*f == '.') * FLAG_D;
 	f += *f == '.';
+	p->prec = -1; 
 	if (f->flag & FLAG_D)
 		p->prec = *f == '*' ? va_arg(ap, int) : prec;
 	while (ft_isdidit(*f) || *f == '0')
 		f++;
-	if (ft_strchr("diouxX",*f) && p->flag & FLAG_D || ft_strchr("spc", *f))
+	if (ft_strchr("diouxX", *f) && p->flag & FLAG_D || ft_strchr("spc", *f))
 		p->flag &= ~FLAG_N;
 	if (p->flag & FLAG_N)
 		p->prec = p->width;
 	return (f);
 }
 
-static char			*ft_printf_conv_str(va_list ap, char c)
+static char			*ft_printf_conv_str(char c,va_list ap)
 {
 	char	*s;
 	char	*tmp;
@@ -63,9 +64,18 @@ static char			*ft_printf_conv_str(va_list ap, char c)
 	return (s);
 }
 
-static char			*ft_printf_conv_prec(char *s, const char c,
-		t_ftprintf_data *p)
+static char			*ft_printf_conv_prec(const char c, t_ftprintf_data *p,
+		char *c)
 {
+	char	*tmp;
+
+	if (prec < 0 || c == 'c')
+	   return (s);
+	if (c == 's' && p->prec < p->len)
+		p->len = p->prec;
+	else if (p->flag & FLAG_D && p->prec == 0 && c != '%')
+		p->len = c == 'p' ? 2 : ft_strlcpy(s, " ", 2) - 1;
+	p->prec += *s == '-' && p->flag & FLAG_D;
 	return (s);
 }
 
