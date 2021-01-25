@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/25 16:17:50 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/25 17:08:47 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ static char			*ft_printf_conv_str(char c, va_list ap)
 		s = ft_itoa(va_arg(ap, int));
 	if (ft_strchr("ouxX", c))
 		s = ft_lutof(va_arg(ap, unsigned int), c);
-	if (ft_strchr("sp", c) && s == 0)
+	if (c == 's' && s == 0)
 		s = ft_strdup("(null)");
 	return (s);
 }
@@ -105,6 +105,8 @@ static int			ft_printf_conv(const char *f, va_list ap)
 	s = ft_printf_conv_str(*f, ap);
 	p.len = *f == 'c' ? 1 : ft_strlen(s);
 	s = ft_printf_conv_prec(*f, &p, s);
+	if (s == 0)
+		return (-1);
 	while ((p.flag & FLAG_M) == 0 && p.width-- > p.len)
 		n += write(1, " ", 1);
 	n += write(1, s, p.len);
@@ -118,19 +120,24 @@ int					ft_printf(const char *f, ...)
 {
 	va_list	ap;
 	int		n;
+	int		m;
 
 	va_start(ap, f);
 	n = 0;
 	while (*f)
 	{
+		m = 0;
 		if (*f == '%' && f[1] != '\0')
 		{
-			n += ft_printf_conv(++f, ap);
+			m += ft_printf_conv(++f, ap);
 			while (ft_isdigit(*f) || ft_strchr(".*-", *f))
 				f++;
 		}
 		else
-			n += write(1, f, 1);
+			m += write(1, f, 1);
+		if (m < 0)
+			return (-1);
+		n += m;
 		f++;
 	}
 	va_end(ap);
