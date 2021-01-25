@@ -1,4 +1,15 @@
-/*TODO Add H42 */
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_lutof.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/01/25 16:19:31 by kbraum            #+#    #+#             */
+/*   Updated: 2021/01/25 16:20:03 by kbraum           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "libft.h"
 
 static unsigned long	ft_ltof_base(char c)
@@ -28,7 +39,7 @@ char					*ft_lutof(unsigned long nbr, char c)
 		s[--i] = fmt[0];
 	while (i)
 	{
-		s[--i]= fmt[nbr % base];
+		s[--i] = fmt[nbr % base];
 		nbr /= base;
 	}
 	return (s);

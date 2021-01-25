@@ -6,29 +6,30 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/25 15:16:37 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/25 16:17:50 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-#include <stdio.h>
+
 static const char	*ft_printf_conv_param(const char *f, va_list ap,
 		t_ftprintf_data *p)
 {
+	p->flag = 0;
 	while (*f == '0' || *f == '-')
 	{
 		p->flag |= (*f == '-') * FLAG_M;
 		p->flag |= (*f++ == '0') * FLAG_N;
 	}
 	p->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
-	p->flag |= (p->width < 0) * FLAG_M;
-	p->flag &= p->flag & FLAG_M ? ~FLAG_N : p->flag;
+	p->flag = (*f == '*' && p->width < 0) ? p->flag | FLAG_M : p->flag;
+	p->flag = p->flag & FLAG_M ? p->flag & ~FLAG_N : p->flag;
 	p->width = ft_abs(p->width);
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
 	p->flag |= (*f == '.') * FLAG_D;
 	f += *f == '.';
-	p->prec = -1; 
+	p->prec = -1;
 	if (p->flag & FLAG_D)
 		p->prec = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
 	if (p->flag & FLAG_D && *f == '*' && p->prec < 0)
@@ -41,7 +42,7 @@ static const char	*ft_printf_conv_param(const char *f, va_list ap,
 	return (f);
 }
 
-static char			*ft_printf_conv_str(char c,va_list ap)
+static char			*ft_printf_conv_str(char c, va_list ap)
 {
 	char	*s;
 	char	*tmp;
@@ -72,7 +73,7 @@ static char			*ft_printf_conv_prec(const char c, t_ftprintf_data *p,
 	char	*tmp;
 
 	if (p->prec < 0 || c == 'c')
-	   return (s);
+		return (s);
 	if (c == 's' && p->prec < p->len)
 		p->len = p->prec;
 	else if (*s == '0' && p->prec == 0 && p->flag & FLAG_D && c != '%')
@@ -90,7 +91,6 @@ static char			*ft_printf_conv_prec(const char c, t_ftprintf_data *p,
 		if ((tmp = ft_strchr(s, '-')))
 			ft_cswap(s, tmp);
 	}
-	p->prec += *s == '-' && p->flag & FLAG_D;
 	return (s);
 }
 
@@ -103,14 +103,14 @@ static int			ft_printf_conv(const char *f, va_list ap)
 	n = 0;
 	f = ft_printf_conv_param(f, ap, &p);
 	s = ft_printf_conv_str(*f, ap);
-	p.len = *f == 'c' ? 2 : ft_strlen(s);
+	p.len = *f == 'c' ? 1 : ft_strlen(s);
 	s = ft_printf_conv_prec(*f, &p, s);
 	while ((p.flag & FLAG_M) == 0 && p.width-- > p.len)
 		n += write(1, " ", 1);
 	n += write(1, s, p.len);
 	while (p.flag & FLAG_M && p.width-- > p.len)
 		n += write(1, " ", 1);
-	free(s); 
+	free(s);
 	return (n);
 }
 
@@ -128,10 +128,10 @@ int					ft_printf(const char *f, ...)
 			n += ft_printf_conv(++f, ap);
 			while (ft_isdigit(*f) || ft_strchr(".*-", *f))
 				f++;
-			f++;
 		}
 		else
-			n += write(1, f++, 1);
+			n += write(1, f, 1);
+		f++;
 	}
 	va_end(ap);
 	return (n);
