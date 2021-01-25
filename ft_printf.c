@@ -6,7 +6,7 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/25 14:16:52 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/25 15:16:37 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,12 @@ static const char	*ft_printf_conv_param(const char *f, va_list ap,
 {
 	while (*f == '0' || *f == '-')
 	{
-		p->flag |= *f == '-' * FLAG_M;
-		p->flag |= *f == '0' * FLAG_N;
-		f++;
+		p->flag |= (*f == '-') * FLAG_M;
+		p->flag |= (*f++ == '0') * FLAG_N;
 	}
 	p->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
 	p->flag |= (p->width < 0) * FLAG_M;
-	p->flag &= ((p->flag & FLAG_M) != 0) * ~FLAG_N;
+	p->flag &= p->flag & FLAG_M ? ~FLAG_N : p->flag;
 	p->width = ft_abs(p->width);
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
@@ -32,12 +31,13 @@ static const char	*ft_printf_conv_param(const char *f, va_list ap,
 	p->prec = -1; 
 	if (p->flag & FLAG_D)
 		p->prec = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
+	if (p->flag & FLAG_D && *f == '*' && p->prec < 0)
+		p->flag &= ~FLAG_D;
 	while (ft_isdigit(*f) || *f == '*')
 		f++;
 	if ((ft_strchr("diouxX", *f) && p->flag & FLAG_D) || ft_strchr("spc", *f))
 		p->flag &= ~FLAG_N;
-	if (p->flag & FLAG_N)
-		p->prec = p->width;
+	p->prec = (p->flag & FLAG_N) ? p->width : p->prec;
 	return (f);
 }
 
