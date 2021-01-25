@@ -6,33 +6,35 @@
 /*   By: kbraum <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 21:40:01 by kbraum            #+#    #+#             */
-/*   Updated: 2021/01/24 22:50:47 by kbraum           ###   ########.fr       */
+/*   Updated: 2021/01/25 14:16:52 by kbraum           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
+#include <stdio.h>
 static const char	*ft_printf_conv_param(const char *f, va_list ap,
 		t_ftprintf_data *p)
 {
 	while (*f == '0' || *f == '-')
 	{
-		p->flag = *f == '-' ? p->flag | FLAG_M : p->flag;
-		p->flag = *f == '0' ? p->flag | FLAG_N: p->flag;
-	}
-	p->width = *f == '*' ? va_arg(ap, int): ft_atoi(f);
-	p->flag &= (p->flag & FLAG_M || p->width < 0) * ~FLAG_N;
-	p->width = ft_abs(p->width);
-	while (ft_isdidit(*f) || *f == '0')
+		p->flag |= *f == '-' * FLAG_M;
+		p->flag |= *f == '0' * FLAG_N;
 		f++;
-	f->flag |= (*f == '.') * FLAG_D;
+	}
+	p->width = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
+	p->flag |= (p->width < 0) * FLAG_M;
+	p->flag &= ((p->flag & FLAG_M) != 0) * ~FLAG_N;
+	p->width = ft_abs(p->width);
+	while (ft_isdigit(*f) || *f == '*')
+		f++;
+	p->flag |= (*f == '.') * FLAG_D;
 	f += *f == '.';
 	p->prec = -1; 
-	if (f->flag & FLAG_D)
-		p->prec = *f == '*' ? va_arg(ap, int) : prec;
-	while (ft_isdidit(*f) || *f == '0')
+	if (p->flag & FLAG_D)
+		p->prec = *f == '*' ? va_arg(ap, int) : ft_atoi(f);
+	while (ft_isdigit(*f) || *f == '*')
 		f++;
-	if (ft_strchr("diouxX", *f) && p->flag & FLAG_D || ft_strchr("spc", *f))
+	if ((ft_strchr("diouxX", *f) && p->flag & FLAG_D) || ft_strchr("spc", *f))
 		p->flag &= ~FLAG_N;
 	if (p->flag & FLAG_N)
 		p->prec = p->width;
@@ -65,16 +67,29 @@ static char			*ft_printf_conv_str(char c,va_list ap)
 }
 
 static char			*ft_printf_conv_prec(const char c, t_ftprintf_data *p,
-		char *c)
+		char *s)
 {
 	char	*tmp;
 
-	if (prec < 0 || c == 'c')
+	if (p->prec < 0 || c == 'c')
 	   return (s);
 	if (c == 's' && p->prec < p->len)
 		p->len = p->prec;
-	else if (p->flag & FLAG_D && p->prec == 0 && c != '%')
+	else if (*s == '0' && p->prec == 0 && p->flag & FLAG_D && c != '%')
 		p->len = c == 'p' ? 2 : ft_strlcpy(s, " ", 2) - 1;
+	else if (ft_strchr("diouxX%", c) && (p->flag & FLAG_D || p->flag & FLAG_N))
+	{
+		p->prec += *s == '-' && p->flag & FLAG_D;
+		while (p->len < p->prec)
+		{
+			tmp = s;
+			s = ft_strjoin("0", s);
+			free(tmp);
+			p->len++;
+		}
+		if ((tmp = ft_strchr(s, '-')))
+			ft_cswap(s, tmp);
+	}
 	p->prec += *s == '-' && p->flag & FLAG_D;
 	return (s);
 }
@@ -88,12 +103,12 @@ static int			ft_printf_conv(const char *f, va_list ap)
 	n = 0;
 	f = ft_printf_conv_param(f, ap, &p);
 	s = ft_printf_conv_str(*f, ap);
-	p.len = *f == 'c' ? 1 : ft_strlen(s);
-	s = ft_printf_conv_prec(s, *f, &p);
-	while ((p.flag & ~FLAG_N) && p.width-- < p.len)
+	p.len = *f == 'c' ? 2 : ft_strlen(s);
+	s = ft_printf_conv_prec(*f, &p, s);
+	while ((p.flag & FLAG_M) == 0 && p.width-- > p.len)
 		n += write(1, " ", 1);
 	n += write(1, s, p.len);
-	while (p.flag & FLAG_M && p.width-- < p.len)
+	while (p.flag & FLAG_M && p.width-- > p.len)
 		n += write(1, " ", 1);
 	free(s); 
 	return (n);
@@ -104,7 +119,7 @@ int					ft_printf(const char *f, ...)
 	va_list	ap;
 	int		n;
 
-	va_start(ap, format);
+	va_start(ap, f);
 	n = 0;
 	while (*f)
 	{
@@ -113,7 +128,7 @@ int					ft_printf(const char *f, ...)
 			n += ft_printf_conv(++f, ap);
 			while (ft_isdigit(*f) || ft_strchr(".*-", *f))
 				f++;
-			f++
+			f++;
 		}
 		else
 			n += write(1, f++, 1);
