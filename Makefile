@@ -15,7 +15,7 @@ CFLAGS		= -Wall -Wextra -Werror -std=c99
 
 LIBFT_F		= ./libft/
 
-LIBFT		= ${LIBFT_F}libft.a
+LIBFT		= libft.a
 
 all:		${NAME}
 
@@ -24,7 +24,8 @@ all:		${NAME}
 			${CC} ${CFLAGS} -c $< -o ${<:.c=.o}
 
 $(NAME):	${OBJS}
-			${AR} ${NAME} ${OBJS} ${LIBFT_F}*.o
+			cp ${LIBFT_F}${LIBFT} ${NAME}
+			${AR} ${NAME} ${OBJS} 
 
 clean:	
 			${MAKE} clean -C ./libft
